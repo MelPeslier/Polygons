@@ -10,7 +10,7 @@ extends EditorPlugin
 ## 	- https://godotengine.org/qa/18051/tool-script-in-3-0
 
 # Icons
-# TODO: Change to const and preload when this is resolved:
+# : Change to const and preload when this is resolved:
 # https://github.com/godotengine/godot/issues/17483
 var ICON_HANDLE: Texture2D = load("res://addons/rmsmartshape/assets/icon_editor_handle.svg")
 var ICON_HANDLE_SELECTED: Texture2D = load("res://addons/rmsmartshape/assets/icon_editor_handle_selected.svg")

@@ -5,4 +5,3 @@ extends Node
 
 func _set_custom_curve_2d(_new_curve : CustomCurve2D) -> void:
 	custom_curve_2d = _new_curve
-	EditorInterface.edit_resource(custom_curve_2d)

@@ -193,7 +193,7 @@ func _update_curve_no_control() -> void:
 		_curve_no_control_points.add_point(_curve.get_point_position(i))
 
 
-# FIXME: Only used by unit test.
+# : Only used by unit test.
 func set_curve(value: Curve2D) -> void:
 	_curve = value
 	_points.clear()
@@ -214,7 +214,7 @@ func _set_editor_debug(value: bool) -> void:
 
 
 func set_render_node_light_masks(value: int) -> void:
-	# TODO: This method should be called when user changes mask in the inspector.
+	# : This method should be called when user changes mask in the inspector.
 	var render_parent: SS2D_Shape_Render = _get_rendering_nodes_parent()
 	for c in render_parent.get_children():
 		c.light_mask = value
@@ -327,7 +327,7 @@ func get_tessellated_points() -> PackedVector2Array:
 		return PackedVector2Array()
 	# Point 0 will be the same on both the curve points and the vertecies
 	# Point size - 1 will be the same on both the curve points and the vertecies
-	# TODO cache this result
+	#  cache this result
 	var points: PackedVector2Array = _curve.tessellate(tessellation_stages, tessellation_tolerence)
 	points[0] = _curve.get_point_position(0)
 	points[points.size() - 1] = _curve.get_point_position(_curve.get_point_count() - 1)
@@ -355,7 +355,7 @@ func adjust_add_point_index(index: int) -> int:
 	return index
 
 
-# FIXME: Only unit tests use this.
+# : Only unit tests use this.
 func add_points(verts: PackedVector2Array, starting_index: int = -1, key: int = -1) -> Array[int]:
 	starting_index = adjust_add_point_index(starting_index)
 	var keys: Array[int] = []
@@ -1394,14 +1394,14 @@ func _on_dirty_update() -> void:
 		_dirty = false
 
 
-# TODO, Migrate these 'point index' functions to a helper library and make static?
+# , Migrate these 'point index' functions to a helper library and make static?
 
-# FIXME: unused function
+# : unused function
 #static func get_first_point_index(_points_: Variant) -> int:
 #	return 0
 
 
-# FIXME: unused function
+# : unused function
 #static func get_last_point_index(points: Variant) -> int:
 #	return points.size() - 1
 
@@ -1529,7 +1529,7 @@ func debug_print_points():
 
 ## Get Number of TessPoints from the start and end indicies of the index_map parameter.
 func _edge_data_get_tess_point_count(index_map: SS2D_IndexMap) -> int:
-	## TODO Test this function
+	##  Test this function
 	var count: int = 0
 	var points: PackedVector2Array = get_vertices()
 	var t_points: PackedVector2Array = get_tessellated_points()
