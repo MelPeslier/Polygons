@@ -1,0 +1,221 @@
+[gd_scene load_steps=33 format=3 uid="uid://d0yb850hcmy43"]
+
+[ext_resource type="Script" path="res://addons/rmsmartshape/shapes/shape_closed.gd" id="1_ptg15"]
+[ext_resource type="Script" path="res://addons/rmsmartshape/shapes/point_array.gd" id="2_l1cue"]
+[ext_resource type="Script" path="res://addons/rmsmartshape/materials/shape_material.gd" id="3_ptlgu"]
+[ext_resource type="Script" path="res://addons/rmsmartshape/shapes/shape_open.gd" id="4_pmjg8"]
+[ext_resource type="Script" path="res://addons/rmsmartshape/vertex_properties.gd" id="5_1umes"]
+[ext_resource type="Script" path="res://addons/rmsmartshape/shapes/point.gd" id="6_2o887"]
+
+[sub_resource type="Resource" id="Resource_pguxs"]
+script = ExtResource("2_l1cue")
+_points = {}
+_point_order = Array[int]([])
+_constraints = {}
+_next_key = 1
+_material_overrides = {}
+
+[sub_resource type="Resource" id="Resource_80gr4"]
+script = ExtResource("3_ptlgu")
+_edge_meta_materials = Array[Resource("res://addons/rmsmartshape/materials/edge_material_metadata.gd")]([])
+fill_textures = Array[Texture2D]([])
+fill_texture_z_index = -10
+fill_texture_show_behind_parent = false
+fill_texture_scale = 1.0
+fill_texture_absolute_position = false
+fill_texture_absolute_rotation = false
+fill_texture_offset = Vector2(0, 0)
+fill_texture_angle_offset = 0.0
+fill_mesh_offset = 0.0
+render_offset = 0.0
+
+[sub_resource type="Resource" id="Resource_mxj8w"]
+script = ExtResource("5_1umes")
+texture_idx = 0
+flip = false
+width = 1.0
+
+[sub_resource type="Resource" id="Resource_3aeg7"]
+script = ExtResource("6_2o887")
+position = Vector2(152, 154)
+point_in = Vector2(0, 0)
+point_out = Vector2(0, 0)
+properties = SubResource("Resource_mxj8w")
+
+[sub_resource type="Resource" id="Resource_g80ma"]
+script = ExtResource("5_1umes")
+texture_idx = 0
+flip = false
+width = 1.0
+
+[sub_resource type="Resource" id="Resource_hso7q"]
+script = ExtResource("6_2o887")
+position = Vector2(397, 255)
+point_in = Vector2(0, 0)
+point_out = Vector2(0, 0)
+properties = SubResource("Resource_g80ma")
+
+[sub_resource type="Resource" id="Resource_sv7h1"]
+script = ExtResource("5_1umes")
+texture_idx = 0
+flip = false
+width = 1.0
+
+[sub_resource type="Resource" id="Resource_e0l5e"]
+script = ExtResource("6_2o887")
+position = Vector2(260, 392)
+point_in = Vector2(0, 0)
+point_out = Vector2(0, 0)
+properties = SubResource("Resource_sv7h1")
+
+[sub_resource type="Resource" id="Resource_v320g"]
+script = ExtResource("5_1umes")
+texture_idx = 0
+flip = false
+width = 1.0
+
+[sub_resource type="Resource" id="Resource_ovobr"]
+script = ExtResource("6_2o887")
+position = Vector2(34, 338)
+point_in = Vector2(0, 0)
+point_out = Vector2(0, 0)
+properties = SubResource("Resource_v320g")
+
+[sub_resource type="Resource" id="Resource_n3be6"]
+script = ExtResource("5_1umes")
+texture_idx = 0
+flip = false
+width = 1.0
+
+[sub_resource type="Resource" id="Resource_ngyim"]
+script = ExtResource("6_2o887")
+position = Vector2(13, 199)
+point_in = Vector2(0, 0)
+point_out = Vector2(0, 0)
+properties = SubResource("Resource_n3be6")
+
+[sub_resource type="Resource" id="Resource_uwbr8"]
+script = ExtResource("5_1umes")
+texture_idx = 0
+flip = false
+width = 1.0
+
+[sub_resource type="Resource" id="Resource_kyqbq"]
+script = ExtResource("6_2o887")
+position = Vector2(152, 154)
+point_in = Vector2(0, 0)
+point_out = Vector2(0, 0)
+properties = SubResource("Resource_uwbr8")
+
+[sub_resource type="Resource" id="Resource_2sl3f"]
+script = ExtResource("5_1umes")
+texture_idx = 0
+flip = false
+width = 1.0
+
+[sub_resource type="Resource" id="Resource_sdlsh"]
+script = ExtResource("6_2o887")
+position = Vector2(111, 266)
+point_in = Vector2(0, 0)
+point_out = Vector2(0, 0)
+properties = SubResource("Resource_2sl3f")
+
+[sub_resource type="Resource" id="Resource_2d245"]
+script = ExtResource("5_1umes")
+texture_idx = 0
+flip = false
+width = 1.0
+
+[sub_resource type="Resource" id="Resource_kiuf1"]
+script = ExtResource("6_2o887")
+position = Vector2(63, 115)
+point_in = Vector2(0, 0)
+point_out = Vector2(0, 0)
+properties = SubResource("Resource_2d245")
+
+[sub_resource type="Resource" id="Resource_7ihj2"]
+script = ExtResource("5_1umes")
+texture_idx = 0
+flip = false
+width = 1.0
+
+[sub_resource type="Resource" id="Resource_udw26"]
+script = ExtResource("6_2o887")
+position = Vector2(262, 121)
+point_in = Vector2(0, 0)
+point_out = Vector2(0, 0)
+properties = SubResource("Resource_7ihj2")
+
+[sub_resource type="Resource" id="Resource_fo3hu"]
+script = ExtResource("5_1umes")
+texture_idx = 0
+flip = false
+width = 1.0
+
+[sub_resource type="Resource" id="Resource_qiecr"]
+script = ExtResource("6_2o887")
+position = Vector2(499, 453)
+point_in = Vector2(0, 0)
+point_out = Vector2(0, 0)
+properties = SubResource("Resource_fo3hu")
+
+[sub_resource type="Resource" id="Resource_2cio8"]
+script = ExtResource("5_1umes")
+texture_idx = 0
+flip = false
+width = 1.0
+
+[sub_resource type="Resource" id="Resource_y31va"]
+script = ExtResource("6_2o887")
+position = Vector2(573, 151)
+point_in = Vector2(0, 0)
+point_out = Vector2(0, 0)
+properties = SubResource("Resource_2cio8")
+
+[sub_resource type="Resource" id="Resource_26fd0"]
+script = ExtResource("2_l1cue")
+_points = {
+0: SubResource("Resource_3aeg7"),
+1: SubResource("Resource_hso7q"),
+2: SubResource("Resource_e0l5e"),
+3: SubResource("Resource_ovobr"),
+4: SubResource("Resource_ngyim"),
+5: SubResource("Resource_kyqbq"),
+6: SubResource("Resource_sdlsh"),
+7: SubResource("Resource_kiuf1"),
+8: SubResource("Resource_udw26"),
+9: SubResource("Resource_qiecr"),
+10: SubResource("Resource_y31va")
+}
+_point_order = Array[int]([0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 5])
+_constraints = {
+Array[int]([0, 5]): 15
+}
+_next_key = 11
+_material_overrides = {}
+
+[sub_resource type="Resource" id="Resource_14tye"]
+script = ExtResource("3_ptlgu")
+_edge_meta_materials = Array[Resource("res://addons/rmsmartshape/materials/edge_material_metadata.gd")]([])
+fill_textures = Array[Texture2D]([])
+fill_texture_z_index = -10
+fill_texture_show_behind_parent = false
+fill_texture_scale = 1.0
+fill_texture_absolute_position = false
+fill_texture_absolute_rotation = false
+fill_texture_offset = Vector2(0, 0)
+fill_texture_angle_offset = 0.0
+fill_mesh_offset = 0.0
+render_offset = 0.0
+
+[node name="Test_asset_drawer" type="Node2D"]
+
+[node name="SS2D_Shape_Closed" type="Node2D" parent="."]
+script = ExtResource("1_ptg15")
+_points = SubResource("Resource_pguxs")
+shape_material = SubResource("Resource_80gr4")
+
+[node name="SS2D_Shape_Open" type="Node2D" parent="."]
+script = ExtResource("4_pmjg8")
+_points = SubResource("Resource_26fd0")
+shape_material = SubResource("Resource_14tye")
