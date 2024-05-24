@@ -1,0 +1,47 @@
+[gd_scene load_steps=6 format=3 uid="uid://cdr008kdmyjx2"]
+
+[ext_resource type="Script" path="res://custom_polygon_tool/custom_polygon_tool.gd" id="1_o4mai"]
+[ext_resource type="Texture2D" uid="uid://dsacf0r5kowb0" path="res://icon.svg" id="2_7qfte"]
+[ext_resource type="Shader" path="res://custom_polygon_tool/custom_polygon_tool.gdshader" id="2_18h3j"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2qck6"]
+shader = ExtResource("2_18h3j")
+
+[sub_resource type="Curve2D" id="Curve2D_64yx4"]
+_data = {
+"points": PackedVector2Array(-50.219, -131, 50.219, 131, 495, 26, 96.1085, 125.475, -96.1085, -125.475, -272, -91, 100, 100, -100, -100, -756, 135, -150.837, 97.4433, 150.837, -97.4433, -231, -442)
+}
+point_count = 4
+
+[node name="CustomPolygonTool" type="Node2D"]
+script = ExtResource("1_o4mai")
+poly_radius = 1000.0
+poly_number_of_points = 6
+
+[node name="StaticBody2D" type="StaticBody2D" parent="."]
+metadata/_edit_group_ = true
+metadata/_edit_lock_ = true
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="StaticBody2D"]
+unique_name_in_owner = true
+build_mode = 1
+polygon = PackedVector2Array(6.12303e-14, -1000, 866.025, -500, 866.025, 500, 6.12303e-14, 1000, -866.025, 500, -866.025, -500, -1.83691e-13, -1000)
+
+[node name="Polygon2D" type="Polygon2D" parent="StaticBody2D"]
+unique_name_in_owner = true
+color = Color(0.145098, 0.145098, 0.145098, 1)
+polygon = PackedVector2Array(6.12303e-14, -1000, 866.025, -500, 866.025, 500, 6.12303e-14, 1000, -866.025, 500, -866.025, -500, -1.83691e-13, -1000)
+
+[node name="Line2D" type="Line2D" parent="."]
+unique_name_in_owner = true
+texture_repeat = 2
+material = SubResource("ShaderMaterial_2qck6")
+points = PackedVector2Array(6.12303e-14, -1000, 866.025, -500, 866.025, 500, 6.12303e-14, 1000, -866.025, 500, -866.025, -500, -1.83691e-13, -1000)
+closed = true
+texture = ExtResource("2_7qfte")
+texture_mode = 1
+joint_mode = 2
+
+[node name="Path2D" type="Path2D" parent="."]
+unique_name_in_owner = true
+curve = SubResource("Curve2D_64yx4")
