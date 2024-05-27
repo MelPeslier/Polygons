@@ -23,10 +23,15 @@ enum Type {
 #func _set_custom_curve_2d(_new_curve : CustomCurve2D) -> void:
 	#custom_curve_2d = _new_curve
 	#EditorInterface.edit_resource(custom_curve_2d)
-
 @export var shape := Shape.FREE : set = _set_shape
+# TODO make visible if shape if FREE
+@export_range(0.0,10,0.001, "radians_as_degrees") var angle_threshold : float = 0.05
 
-@export var show_path := false : set = _set_show_path
+# TODO rendre ces variable accessible si show debug true !
+@export var debug_points_color : Array[Color] = [Color.TOMATO, Color.ORANGE]
+@export var debug_points_radius : float = 7.0
+
+@export var show_debug := false : set = _set_show_debug
 @export var show_collision_polygone := false : set = _set_show_collision_polygone
 
 @export var edge_material : ShaderMaterial
@@ -43,6 +48,7 @@ var custom_bake_interval: float = 75 : set = _set_custom_bake_interval
 # For User
 var poly_radius: float = 250 : set = _set_poly_radius
 var poly_number_of_points: int = 3 : set = _set_poly_number_of_points
+
 #endregion
 
 # TODO : Initialise them in _ready function
@@ -96,6 +102,11 @@ func _get_property_list() -> Array[Dictionary]:
 	return properties
 
 
+func _draw() -> void:
+	for i: int in line.points.size():
+		draw_circle(line.points[i], debug_points_radius, debug_points_color[i % debug_points_color.size()])
+
+
 
 func _ready() -> void:
 	print("_ready start -----")
@@ -120,9 +131,9 @@ func _ready() -> void:
 	_update_polygon()
 
 	# Update exported variables
-	show_path = show_path
+	show_debug = show_debug
 	show_collision_polygone = show_collision_polygone
-
+	print(rad_to_deg(angle_threshold))
 	init_default_shape()
 	shape = shape
 	print("_ready end -----")
@@ -132,7 +143,7 @@ func _ready() -> void:
 
 # CustomCurve2D is now connected to the function
 func _refresh_curve() -> void:
-	print("****** _refresh_curve ******")
+	print("\n****** _refresh_curve ******")
 	match shape:
 		#Shape.FREE:
 			#we do free
@@ -142,11 +153,57 @@ func _refresh_curve() -> void:
 		# TODO : Bring a pop-up that will tell that the current curve will be erased, are you sure to proceed ?
 	var _custom_curve : CustomCurve2D = curve as CustomCurve2D
 	# TODO calculate the needed backed points depending on the line they formm to remove the maximum vertices depending on a threshold (angle ?)
-	var points := _custom_curve.get_baked_points()
-	#if not points: return
+
+	var _points := _custom_curve.get_baked_points()
+	if not _points: return
+
+	var points := PackedVector2Array()
+	#points.push_back(_points[-1])
+	#points.push_back(_points[0])
+
+	# V1 a bit too random
+	#for i: int in range(2, _points.size()):
+		#var vec1 := points[-1] - points[-2]
+		#var vec2 := _points[(i) % _points.size()] - points[-2]
+		#var angle := vec1.angle_to(vec2)
+		#if abs(angle) > angle_threshold:
+			## Keep the next point and go to next
+			#points.push_back(_points[(i) % _points.size()])
+
+	# V2 : Keeping primordial points
+	var primordials_points := PackedVector2Array()
+	for i: int in _custom_curve.point_count:
+		primordials_points.push_back( _custom_curve.get_point_position(i) )
+
+	points.push_back(primordials_points[0])
+	points.push_back(_points[1])
+	var next_primordial_index : int = 1
+
+	for i: int in range(2, _points.size()):
+		var previous_point := points[-2]
+		var actual_point := points[-1]
+		var next_point := _points[i]
+		var next_primordial := primordials_points[next_primordial_index]
+
+		if next_point == next_primordial:
+			if points[-1] == next_primordial:
+				break
+
+			points.push_back(next_primordial)
+			next_primordial_index = min( (next_primordial_index + 1), (primordials_points.size()-1) )
+			continue
+
+		var vec1 := actual_point - previous_point
+		var vec2 := next_point - actual_point
+		var angle := vec1.angle_to(vec2)
+		if abs(angle) > angle_threshold:
+			# Keep the next point and go to next
+			points.push_back( next_point )
+
+
 	if line:
 		line.points = points
-		print("after refresh actual points : ", line.points.size())
+		print("after refresh actual points : ", line.points.size(), "   removed : ", _points.size() - points.size())
 	if collision_polygon:
 		collision_polygon.polygon = points
 	if polygon:
@@ -156,7 +213,7 @@ func _refresh_curve() -> void:
 
 #region Functions
 func _update_circle_polygon() -> void:
-	print("_______ update_circle_polygon _______")
+	print("\n_______ update_circle_polygon _______")
 	draw_circle_polygon(poly_radius, poly_number_of_points)
 
 func draw_circle_polygon(_radius: float, _nb_points: int) -> void:
@@ -167,7 +224,7 @@ func draw_circle_polygon(_radius: float, _nb_points: int) -> void:
 		var point_in_space : Vector2 = Vector2( cos(point), sin(point) ) * _radius
 		points.push_back(point_in_space)
 		curve.add_point( point_in_space )
-	#var points = curve.get_baked_points()
+
 	if line:
 		line.points = points
 		print("after update actual points : ", line.points.size())
@@ -175,7 +232,7 @@ func draw_circle_polygon(_radius: float, _nb_points: int) -> void:
 		collision_polygon.polygon = points
 	if polygon:
 		polygon.polygon = points
-	#_refresh_curve()
+
 
 
 func _update_line() -> void:
@@ -236,11 +293,11 @@ func _set_shape(_shape: Shape) -> void:
 
 	notify_property_list_changed()
 
-func _set_show_path(_show_path: bool) -> void:
-	show_path = _show_path
+func _set_show_debug(_show_debug: bool) -> void:
+	show_debug = _show_debug
 	if not is_inside_tree():
 		return
-	if show_path:
+	if show_debug:
 		line.z_index = line_z_index
 		polygon.z_index = polygon_z_index
 	else:

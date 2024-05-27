@@ -6,11 +6,10 @@
 [ext_resource type="Script" path="res://custom_polygon_tool/CustomCurve2D.gd" id="4_wltjh"]
 
 [sub_resource type="Curve2D" id="Curve2D_qygqi"]
-bake_interval = 25.0
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 2.78049e-14, -454.103, 0, 0, 0, 0, 173.778, -419.536, 0, 0, 0, 0, 321.099, -321.099, 0, 0, 0, 0, 419.536, -173.778, 0, 0, 0, 0, 454.103, 0, 0, 0, 0, 0, 419.536, 173.778, 0, 0, 0, 0, 321.099, 321.099, 0, 0, 0, 0, 173.778, 419.536, 0, 0, 0, 0, 2.78049e-14, 454.103, 0, 0, 0, 0, -173.778, 419.536, 0, 0, 0, 0, -321.099, 321.099, 0, 0, 0, 0, -419.536, 173.778, 0, 0, 0, 0, -454.103, 5.56097e-14, 0, 0, 0, 0, -419.536, -173.778, 0, 0, 0, 0, -321.099, -321.099, 0, 0, 0, 0, -173.778, -419.536, 0, 0, 0, 0, -8.34146e-14, -454.103)
+"points": PackedVector2Array(-49.5793, -5.31218, 0, 0, 40, -528, 340.209, -43.4903, -340.209, 43.4903, 152, -336, 0, 0, 0, 0, 373.719, -257.96, 0, 0, 0, 0, 450.792, -54.7361, -28.3482, -20.4737, 28.3482, 20.4737, 432, 176, 0, 0, 0, 0, 301.126, 339.901, 0, 0, 0, 0, 108.674, 440.908, 0, 0, 0, 0, -108.674, 440.908, 0, 0, 0, 0, -301.126, 339.901, 0, 0, 0, 0, -424.594, 161.027, 0, 0, 0, 0, -450.792, -54.7361, -520.86, -204.758, 520.86, 204.758, -373.719, -257.96, 0, 0, 0, 0, -211.032, -402.088, -76.6173, -37.4177, 76.6173, 37.4177, 40, -528)
 }
-point_count = 17
+point_count = 14
 script = ExtResource("4_wltjh")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7ycuf"]
@@ -21,14 +20,13 @@ shader = ExtResource("4_ftvwt")
 
 [node name="CustomPolygonTool" type="Path2D"]
 unique_name_in_owner = true
+position = Vector2(16, -8)
 curve = SubResource("Curve2D_qygqi")
 script = ExtResource("1_o4mai")
-shape = 1
-show_path = true
 edge_material = SubResource("ShaderMaterial_7ycuf")
 inner_material = SubResource("ShaderMaterial_koiot")
 poly_radius = 454.103
-poly_number_of_points = 16
-custom_bake_interval = 25.0
+poly_number_of_points = 13
+custom_bake_interval = 5.0
 metadata/_edit_group_ = true
 metadata/_edit_vertical_guides_ = [-305.0]
