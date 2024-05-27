@@ -6,10 +6,11 @@
 [ext_resource type="Script" path="res://custom_polygon_tool/CustomCurve2D.gd" id="4_wltjh"]
 
 [sub_resource type="Curve2D" id="Curve2D_qygqi"]
+bake_interval = 92.0
 _data = {
-"points": PackedVector2Array(-49.5793, -5.31218, 0, 0, 40, -528, 340.209, -43.4903, -340.209, 43.4903, 152, -336, 0, 0, 0, 0, 373.719, -257.96, 0, 0, 0, 0, 450.792, -54.7361, -28.3482, -20.4737, 28.3482, 20.4737, 432, 176, 0, 0, 0, 0, 301.126, 339.901, 0, 0, 0, 0, 108.674, 440.908, 0, 0, 0, 0, -108.674, 440.908, 0, 0, 0, 0, -301.126, 339.901, 0, 0, 0, 0, -424.594, 161.027, 0, 0, 0, 0, -450.792, -54.7361, -520.86, -204.758, 520.86, 204.758, -373.719, -257.96, 0, 0, 0, 0, -211.032, -402.088, -76.6173, -37.4177, 76.6173, 37.4177, 40, -528)
+"points": PackedVector2Array(0, 0, 0, 0, 2.41232e-14, -393.975, 0, 0, 0, 0, 212.999, -331.433, 0, 0, 0, 0, 358.372, -163.663, 0, 0, 0, 0, 389.965, 56.0685, 0, 0, 0, 0, 297.746, 257.999, 0, 0, 0, 0, 110.996, 378.016, 0, 0, 0, 0, -110.996, 378.016, 0, 0, 0, 0, -297.746, 257.999, 0, 0, 0, 0, -389.965, 56.0685, 0, 0, 0, 0, -358.372, -163.663, 0, 0, 0, 0, -212.999, -331.433, 0, 0, 0, 0, -4.2229e-13, -393.975)
 }
-point_count = 14
+point_count = 12
 script = ExtResource("4_wltjh")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7ycuf"]
@@ -20,13 +21,18 @@ shader = ExtResource("4_ftvwt")
 
 [node name="CustomPolygonTool" type="Path2D"]
 unique_name_in_owner = true
-position = Vector2(16, -8)
 curve = SubResource("Curve2D_qygqi")
 script = ExtResource("1_o4mai")
 edge_material = SubResource("ShaderMaterial_7ycuf")
 inner_material = SubResource("ShaderMaterial_koiot")
-poly_radius = 454.103
-poly_number_of_points = 13
-custom_bake_interval = 5.0
+shape = 1
+show_debug = true
+poly_radius = 393.975
+poly_number_of_points = 11
+free_custom_bake_interval = 92.0
+free_angle_threshold = 0.00872665
+debug_show_collision_polygone = false
+debug_points_radius = 7.0
+debug_points_color = Array[Color]([Color(1, 0.388235, 0.278431, 1), Color(1, 0.647059, 0, 1)])
 metadata/_edit_group_ = true
 metadata/_edit_vertical_guides_ = [-305.0]

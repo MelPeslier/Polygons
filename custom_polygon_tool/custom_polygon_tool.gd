@@ -6,6 +6,10 @@ const line_z_index : int = -1
 const polygon_z_index : int = -2
 const tex = preload("res://icon.svg")
 
+# TODO : make it an addon
+# TODO : make it so we can undo and get out previous shape
+# It does not work when going from free to poly and hitting undo key
+# TODO : Make a basic material that takes the sdf of the current shape and use a fractal on it
 
 enum Shape {
 	FREE,
@@ -23,35 +27,37 @@ enum Type {
 #func _set_custom_curve_2d(_new_curve : CustomCurve2D) -> void:
 	#custom_curve_2d = _new_curve
 	#EditorInterface.edit_resource(custom_curve_2d)
-@export var shape := Shape.FREE : set = _set_shape
-# TODO make visible if shape if FREE
-@export_range(0.0,10,0.001, "radians_as_degrees") var angle_threshold : float = 0.05
 
-# TODO rendre ces variable accessible si show debug true !
-@export var debug_points_color : Array[Color] = [Color.TOMATO, Color.ORANGE]
-@export var debug_points_radius : float = 7.0
-
-@export var show_debug := false : set = _set_show_debug
-@export var show_collision_polygone := false : set = _set_show_collision_polygone
 
 @export var edge_material : ShaderMaterial
 @export var inner_material : ShaderMaterial
 var is_curve_connected := false : set = _set_is_curve_connected
 
-var custom_bake_interval: float = 75 : set = _set_custom_bake_interval
 
+
+@export var shape := Shape.FREE : set = _set_shape
 #region FREE properties
+#@export_group("FREE", "free_")
+var free_custom_bake_interval: float = 75 : set = _set_free_custom_bake_interval
+var free_angle_threshold : float = 0.05 : set = _set_free_angle_threshold
 #endregion
-
 
 #region POLY properties
-# For User
+#@export_group("POLY", "poly_")
 var poly_radius: float = 250 : set = _set_poly_radius
 var poly_number_of_points: int = 3 : set = _set_poly_number_of_points
-
 #endregion
 
-# TODO : Initialise them in _ready function
+
+#region Debug Properties
+@export var show_debug := false : set = _set_show_debug
+#@export_group("Debug", "debug_")
+var debug_show_collision_polygone := false : set = _set_debug_show_collision_polygone
+var debug_points_color : Array[Color] = [Color.TOMATO, Color.ORANGE] : set = _set_debug_points_color
+var debug_points_radius : float = 7.0 : set = _set_debug_points_radius
+#endregion
+
+# Nodes
 var line: Line2D
 var static_body : StaticBody2D
 var polygon: Polygon2D
@@ -61,11 +67,15 @@ var collision_polygon: CollisionPolygon2D
 func _get_property_list() -> Array[Dictionary]:
 	var poly_property_usage = PROPERTY_USAGE_NO_EDITOR
 	var free_property_usage = PROPERTY_USAGE_NO_EDITOR
+	var debug_property_usage = PROPERTY_USAGE_NO_EDITOR
 	match shape:
 		Shape.POLY:
 			poly_property_usage = PROPERTY_USAGE_DEFAULT
 		Shape.FREE:
 			free_property_usage = PROPERTY_USAGE_DEFAULT
+
+	if show_debug:
+		debug_property_usage = PROPERTY_USAGE_DEFAULT
 
 	var poly_properties : Array[Dictionary] = [
 		{
@@ -73,7 +83,7 @@ func _get_property_list() -> Array[Dictionary]:
 			"class_name" : "",
 			"type" : TYPE_FLOAT,
 			"hint" : PROPERTY_HINT_RANGE,
-			"hint_string" : "50, 10000, 10, or_greater, or_lesser, suffix:px",
+			"hint_string" : "",
 			"usage" : poly_property_usage,
 		},
 		{
@@ -81,28 +91,63 @@ func _get_property_list() -> Array[Dictionary]:
 			"class_name" : "",
 			"type" : TYPE_INT,
 			"hint" : PROPERTY_HINT_RANGE,
-			"hint_string" : "3, 100, 1, suffix:points",
+			"hint_string" : "3.0, 60.0, 1, suffix:points",
 			"usage" : poly_property_usage,
 		},
 	]
 
 	var free_properties : Array[Dictionary] = [
 		{
-			"name" : "custom_bake_interval",
+			"name" : "free_custom_bake_interval",
 			"class_name" : "",
 			"type" : TYPE_FLOAT,
 			"hint" : PROPERTY_HINT_RANGE,
-			"hint_string" : "5, 10000, 10, or_greater, or_lesser, suffix:px",
+			"hint_string" : "5, 150, 10, or_greater, suffix:px",
+			"usage" : free_property_usage,
+		},
+		{
+			"name" : "free_angle_threshold",
+			"class_name" : "",
+			"type" : TYPE_FLOAT,
+			"hint" : PROPERTY_HINT_RANGE,
+			"hint_string" : "0.0, 5.0, 0.001, or_greater, radians_as_degrees",
 			"usage" : free_property_usage,
 		},
 	]
 
-	var properties : Array[Dictionary] = poly_properties + free_properties
+	var debug_properties : Array[Dictionary] = [
+		{
+			"name" : "debug_show_collision_polygone",
+			"class_name" : "",
+			"type" : TYPE_BOOL,
+			"hint" : PROPERTY_HINT_NONE,
+			"hint_string" : "5, 150, 10, or_greater, suffix:px",
+			"usage" : debug_property_usage,
+		},
+		{
+			"name" : "debug_points_radius",
+			"class_name" : "",
+			"type" : TYPE_FLOAT,
+			"hint" : PROPERTY_HINT_RANGE,
+			"hint_string" : "2.5, 50, 0.001, or_greater, suffix:px",
+			"usage" : debug_property_usage,
+		},
+		{
+			"name" : "debug_points_color",
+			"class_name" : "",
+			"type" : TYPE_ARRAY,
+			"hint" : PROPERTY_HINT_ARRAY_TYPE,
+			"hint_string" : TYPE_COLOR,
+			"usage" : debug_property_usage,
+		},
+	]
+	var properties : Array[Dictionary] = poly_properties + free_properties + debug_properties
 
 	return properties
 
 
 func _draw() -> void:
+	if not show_debug: return
 	for i: int in line.points.size():
 		draw_circle(line.points[i], debug_points_radius, debug_points_color[i % debug_points_color.size()])
 
@@ -132,8 +177,8 @@ func _ready() -> void:
 
 	# Update exported variables
 	show_debug = show_debug
-	show_collision_polygone = show_collision_polygone
-	print(rad_to_deg(angle_threshold))
+	debug_show_collision_polygone = debug_show_collision_polygone
+	print(rad_to_deg(free_angle_threshold))
 	init_default_shape()
 	shape = shape
 	print("_ready end -----")
@@ -151,30 +196,17 @@ func _refresh_curve() -> void:
 			shape = Shape.FREE
 			print("want to edit this shape freely ?")
 		# TODO : Bring a pop-up that will tell that the current curve will be erased, are you sure to proceed ?
+		# Juste le faire et affficher un bouton undo / que l'on peut faire ctrl + z
 	var _custom_curve : CustomCurve2D = curve as CustomCurve2D
-	# TODO calculate the needed backed points depending on the line they formm to remove the maximum vertices depending on a threshold (angle ?)
 
 	var _points := _custom_curve.get_baked_points()
 	if not _points: return
 
-	var points := PackedVector2Array()
-	#points.push_back(_points[-1])
-	#points.push_back(_points[0])
-
-	# V1 a bit too random
-	#for i: int in range(2, _points.size()):
-		#var vec1 := points[-1] - points[-2]
-		#var vec2 := _points[(i) % _points.size()] - points[-2]
-		#var angle := vec1.angle_to(vec2)
-		#if abs(angle) > angle_threshold:
-			## Keep the next point and go to next
-			#points.push_back(_points[(i) % _points.size()])
-
-	# V2 : Keeping primordial points
 	var primordials_points := PackedVector2Array()
 	for i: int in _custom_curve.point_count:
 		primordials_points.push_back( _custom_curve.get_point_position(i) )
 
+	var points := PackedVector2Array()
 	points.push_back(primordials_points[0])
 	points.push_back(_points[1])
 	var next_primordial_index : int = 1
@@ -196,18 +228,20 @@ func _refresh_curve() -> void:
 		var vec1 := actual_point - previous_point
 		var vec2 := next_point - actual_point
 		var angle := vec1.angle_to(vec2)
-		if abs(angle) > angle_threshold:
+		if abs(angle) > free_angle_threshold:
 			# Keep the next point and go to next
 			points.push_back( next_point )
 
-
 	if line:
 		line.points = points
+		# TODO : faire une petit fenetre pop qui indique le nombre de points enlevés !
 		print("after refresh actual points : ", line.points.size(), "   removed : ", _points.size() - points.size())
 	if collision_polygon:
 		collision_polygon.polygon = points
 	if polygon:
 		polygon.polygon = points
+
+	queue_redraw()
 
 
 
@@ -293,8 +327,10 @@ func _set_shape(_shape: Shape) -> void:
 
 	notify_property_list_changed()
 
+#region Debug
 func _set_show_debug(_show_debug: bool) -> void:
 	show_debug = _show_debug
+	debug_show_collision_polygone = false
 	if not is_inside_tree():
 		return
 	if show_debug:
@@ -303,25 +339,47 @@ func _set_show_debug(_show_debug: bool) -> void:
 	else:
 		line.z_index = -polygon_z_index
 		polygon.z_index = -line_z_index
+	notify_property_list_changed()
+	queue_redraw()
 
 
-func _set_show_collision_polygone(_show_collision_polygone: bool) -> void:
-	show_collision_polygone = _show_collision_polygone
+func _set_debug_show_collision_polygone(_debug_show_collision_polygone: bool) -> void:
+	debug_show_collision_polygone = _debug_show_collision_polygone
 	if not is_inside_tree():
 		return
-	polygon.visible = !show_collision_polygone
-	collision_polygon.visible = show_collision_polygone
+	polygon.visible = !debug_show_collision_polygone
+	collision_polygon.visible = debug_show_collision_polygone
 
-
-func _set_custom_bake_interval(_custom_bake_interval : float) -> void:
-	custom_bake_interval = _custom_bake_interval
+func _set_debug_points_color(_debug_points_color: Array[Color]) -> void:
+	debug_points_color = _debug_points_color
 	if not is_inside_tree():
 		return
-	curve.bake_interval = custom_bake_interval
+	queue_redraw()
+
+func _set_debug_points_radius(_debug_points_radius: float) -> void:
+	debug_points_radius = _debug_points_radius
+	if not is_inside_tree():
+		return
+	queue_redraw()
+
+#endregion
+
+#region FREE
+func _set_free_custom_bake_interval(_free_custom_bake_interval : float) -> void:
+	free_custom_bake_interval = _free_custom_bake_interval
+	if not is_inside_tree():
+		return
+	curve.bake_interval = free_custom_bake_interval
 	_refresh_curve()
-# FREE
 
-# POLY
+func _set_free_angle_threshold(_free_angle_threshold : float) -> void:
+	free_angle_threshold = _free_angle_threshold
+	if not is_inside_tree():
+		return
+	_refresh_curve()
+#endregion
+
+#region POLY
 func _set_poly_radius(_poly_radius) -> void:
 	poly_radius = _poly_radius
 	if not is_inside_tree():
@@ -333,5 +391,4 @@ func _set_poly_number_of_points(_poly_number_of_points) -> void:
 	if not is_inside_tree():
 		return
 	_update_circle_polygon()
-
 #endregion
