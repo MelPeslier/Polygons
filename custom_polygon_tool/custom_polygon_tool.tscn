@@ -25,7 +25,6 @@ curve = SubResource("Curve2D_qygqi")
 script = ExtResource("1_o4mai")
 edge_material = SubResource("ShaderMaterial_7ycuf")
 inner_material = SubResource("ShaderMaterial_koiot")
-shape = 1
 show_debug = true
 poly_radius = 393.975
 poly_number_of_points = 11

@@ -63,7 +63,7 @@ var static_body : StaticBody2D
 var polygon: Polygon2D
 var collision_polygon: CollisionPolygon2D
 
-
+# TODO :remove the suffix of property groups !
 func _get_property_list() -> Array[Dictionary]:
 	var poly_property_usage = PROPERTY_USAGE_NO_EDITOR
 	var free_property_usage = PROPERTY_USAGE_NO_EDITOR
@@ -78,6 +78,11 @@ func _get_property_list() -> Array[Dictionary]:
 		debug_property_usage = PROPERTY_USAGE_DEFAULT
 
 	var poly_properties : Array[Dictionary] = [
+		{
+			"name": "POLY",
+			"type": TYPE_NIL,
+			"usage": PROPERTY_USAGE_GROUP | PROPERTY_USAGE_SCRIPT_VARIABLE
+		},
 		{
 			"name" : "poly_radius",
 			"class_name" : "",
@@ -98,6 +103,11 @@ func _get_property_list() -> Array[Dictionary]:
 
 	var free_properties : Array[Dictionary] = [
 		{
+			"name": "FREE",
+			"type": TYPE_NIL,
+			"usage": PROPERTY_USAGE_GROUP | PROPERTY_USAGE_SCRIPT_VARIABLE
+		},
+		{
 			"name" : "free_custom_bake_interval",
 			"class_name" : "",
 			"type" : TYPE_FLOAT,
@@ -116,6 +126,11 @@ func _get_property_list() -> Array[Dictionary]:
 	]
 
 	var debug_properties : Array[Dictionary] = [
+		{
+			"name": "Debug",
+			"type": TYPE_NIL,
+			"usage": PROPERTY_USAGE_GROUP | PROPERTY_USAGE_SCRIPT_VARIABLE
+		},
 		{
 			"name" : "debug_show_collision_polygone",
 			"class_name" : "",
