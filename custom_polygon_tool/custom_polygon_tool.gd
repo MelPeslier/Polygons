@@ -7,12 +7,12 @@ const POLYGON_Z_INDEX : int = -2
 const INNER_BASE_MATERIAL = preload("res://custom_polygon_tool/cpt_inner.gdshader")
 const LINE_BASE_MATERIAL = preload("res://custom_polygon_tool/cpt_line.gdshader")
 const MATERIAL_BASE_TEXTURE = preload("res://custom_polygon_tool/cpt_inner_custom.bmp")
-# TODO Give a choice in the material, to make the uv local  or not and psecifie in inspector that you must configure the uv in the uv editor of pollygon :)
+
 # TODO : make it an addon
 # TODO : make it so we can undo and get out previous shape
 # It does not work when going from free to poly and hitting undo key
-# TODO : Make a basic material that takes the sdf of the current shape and use a fractal on it
-
+#  TODO : material : Use #if to reduce performance costs and not calculating other parts than the actual one ?
+# TODO automatically bake a UV centered with edges on edges (maximise size) for polygon
 enum Shape {
 	FREE,
 	POLY,
@@ -25,29 +25,35 @@ enum Type {
 
 @export var inner_material : ShaderMaterial : set = _set_inner_material
 
-@export var draw_line_on_borders := false : set = _set_draw_line_on_borders # TODO : Make line material adaptative to this
-@export var line_material : ShaderMaterial : set = _set_line_material
-
+@export_group("Shape")
 @export var shape := Shape.FREE : set = _set_shape
 #region FREE properties
-#@export_group("FREE", "free_")
+#@export_subgroup("FREE", "free_")
 var free_custom_bake_interval: float = 75 : set = _set_free_custom_bake_interval
 var free_angle_threshold : float = 0.05 : set = _set_free_angle_threshold
 #endregion
 
+
 #region POLY properties
-#@export_group("POLY", "poly_")
+#@export_subgroup("POLY", "poly_")
 var poly_radius: float = 250 : set = _set_poly_radius
 var poly_number_of_points: int = 3 : set = _set_poly_number_of_points
 #endregion
 
 
 #region Debug Properties
-@export var show_debug := false : set = _set_show_debug
-#@export_group("Debug", "debug_")
+@export_group("Debug", "debug_")
+@export var debug_show := false : set = _set_debug_show
 var debug_show_collision_polygone := false : set = _set_debug_show_collision_polygone
 var debug_points_color : Array[Color] = [Color.TOMATO, Color.ORANGE] : set = _set_debug_points_color
 var debug_points_radius : float = 7.0 : set = _set_debug_points_radius
+#endregion
+
+
+#region Line Properties
+@export_group("Line", "line_")
+@export var line_draw_on_borders := false : set = _set_line_draw_on_borders
+var line_material : ShaderMaterial : set = _set_line_material
 #endregion
 
 var is_curve_connected := false : set = _set_is_curve_connected
@@ -60,25 +66,34 @@ var polygon: Polygon2D
 var collision_polygon: CollisionPolygon2D #TODO make their collision layers and masks editable into the inspector 
 var light_occluder : LightOccluder2D #TODO make their collision layers and masks editable into the inspector 
 
-# TODO :remove the suffix of property groups !
+
 func _get_property_list() -> Array[Dictionary]:
 	var poly_property_usage = PROPERTY_USAGE_NO_EDITOR
 	var free_property_usage = PROPERTY_USAGE_NO_EDITOR
 	var debug_property_usage = PROPERTY_USAGE_NO_EDITOR
+	var line_property_usage = PROPERTY_USAGE_NO_EDITOR
 	match shape:
 		Shape.POLY:
 			poly_property_usage = PROPERTY_USAGE_DEFAULT
 		Shape.FREE:
 			free_property_usage = PROPERTY_USAGE_DEFAULT
 
-	if show_debug:
+	if debug_show:
 		debug_property_usage = PROPERTY_USAGE_DEFAULT
+	
+	if line_draw_on_borders:
+		line_property_usage = PROPERTY_USAGE_DEFAULT
 
 	var poly_properties : Array[Dictionary] = [
 		{
-			"name": "POLY",
+			"name": "Shape",
 			"type": TYPE_NIL,
 			"usage": PROPERTY_USAGE_GROUP | PROPERTY_USAGE_SCRIPT_VARIABLE
+		},
+		{
+			"name": "Poly",
+			"type": TYPE_NIL,
+			"usage": PROPERTY_USAGE_SUBGROUP | PROPERTY_USAGE_SCRIPT_VARIABLE
 		},
 		{
 			"name" : "poly_radius",
@@ -100,9 +115,14 @@ func _get_property_list() -> Array[Dictionary]:
 
 	var free_properties : Array[Dictionary] = [
 		{
-			"name": "FREE",
+			"name": "Shape",
 			"type": TYPE_NIL,
 			"usage": PROPERTY_USAGE_GROUP | PROPERTY_USAGE_SCRIPT_VARIABLE
+		},
+		{
+			"name": "Free",
+			"type": TYPE_NIL,
+			"usage": PROPERTY_USAGE_SUBGROUP | PROPERTY_USAGE_SCRIPT_VARIABLE
 		},
 		{
 			"name" : "free_custom_bake_interval",
@@ -153,20 +173,34 @@ func _get_property_list() -> Array[Dictionary]:
 			"usage" : debug_property_usage,
 		},
 	]
-	var properties : Array[Dictionary] = poly_properties + free_properties + debug_properties
-
+	
+	var line_properties : Array[Dictionary] = [
+		{
+			"name": "Line",
+			"type": TYPE_NIL,
+			"usage": PROPERTY_USAGE_GROUP | PROPERTY_USAGE_SCRIPT_VARIABLE
+		},
+		{
+			"name" : "line_material",
+			"class_name" : "",
+			"type" : TYPE_OBJECT,
+			"hint" : PROPERTY_HINT_RESOURCE_TYPE,
+			"hint_string" : "ShaderMaterial",
+			"usage" : line_property_usage,
+		},
+	]
+	
+	var properties : Array[Dictionary] = poly_properties + free_properties + debug_properties + line_properties
 	return properties
 
 
 func _draw() -> void:
-	if not show_debug: return
+	if not debug_show: return
 	for i: int in line.points.size():
 		draw_circle(line.points[i], debug_points_radius, debug_points_color[i % debug_points_color.size()])
 
 
-
 func _ready() -> void:
-	print("_ready start -----")
 	# Update curve
 	if not (curve and curve is CustomCurve2D):
 		curve = CustomCurve2D.new()
@@ -195,19 +229,16 @@ func _ready() -> void:
 	_update_occluder()
 
 	# Update exported variables
-	show_debug = show_debug
+	debug_show = debug_show
 	debug_show_collision_polygone = debug_show_collision_polygone
-	print(rad_to_deg(free_angle_threshold))
 	init_default_shape()
 	shape = shape
-	print("_ready end -----")
 
 
 
 
 # CustomCurve2D is now connected to the function
 func _refresh_curve() -> void:
-	print("\n****** _refresh_curve ******")
 	match shape:
 		#Shape.FREE:
 			#we do free
@@ -265,7 +296,6 @@ func _refresh_curve() -> void:
 
 #region Functions
 func _update_circle_polygon() -> void:
-	print("\n_______ update_circle_polygon _______")
 	draw_circle_polygon(poly_radius, poly_number_of_points)
 
 func draw_circle_polygon(_radius: float, _nb_points: int) -> void:
@@ -279,7 +309,6 @@ func draw_circle_polygon(_radius: float, _nb_points: int) -> void:
 
 	if line:
 		line.points = points
-		print("after update actual points : ", line.points.size())
 	if collision_polygon:
 		collision_polygon.polygon = points
 	if polygon:
@@ -292,7 +321,7 @@ func _update_line() -> void:
 	line.z_index = LINE_Z_INDEX
 	line.texture_mode = Line2D.LINE_TEXTURE_TILE
 	line_material = line_material
-	draw_line_on_borders = draw_line_on_borders
+	line_draw_on_borders = line_draw_on_borders
 
 func _update_polygon() -> void:
 	polygon.z_index = POLYGON_Z_INDEX
@@ -312,17 +341,17 @@ func init_default_shape() -> void:
 	if curve.point_count < 2:
 		shape = Shape.POLY
 
-func _set_draw_line_on_borders(_draw_line_on_borders) -> void:
-	draw_line_on_borders = _draw_line_on_borders
+func _set_line_draw_on_borders(_line_draw_on_borders) -> void:
+	line_draw_on_borders = _line_draw_on_borders
+	
 	if not is_inside_tree():
 		return
 	if line:
-		line.visible = draw_line_on_borders
-	
+		line.visible = line_draw_on_borders
+	notify_property_list_changed()
 
 
 func _set_is_curve_connected(_is : bool) -> void:
-	print("_set_is_curve_connected ", _is)
 	is_curve_connected = _is
 	var _custom_curve : CustomCurve2D = curve as CustomCurve2D
 	# Disconnect curve
@@ -334,16 +363,12 @@ func _set_is_curve_connected(_is : bool) -> void:
 	# Connect curve
 	if not _custom_curve.points_changed.is_connected(_refresh_curve):
 		_custom_curve.points_changed.connect(_refresh_curve)
-		print("just_connected")
-	else:
-		print("already connected")
+
 
 
 func _set_shape(_shape: Shape) -> void:
 	shape = _shape
 	if not is_inside_tree(): return
-
-	print("set_shape ", _shape)
 	# Only if new shape
 	_set_is_curve_connected(true)
 	match shape:
@@ -356,12 +381,12 @@ func _set_shape(_shape: Shape) -> void:
 	notify_property_list_changed()
 
 #region Debug
-func _set_show_debug(_show_debug: bool) -> void:
-	show_debug = _show_debug
+func _set_debug_show(_debug_show: bool) -> void:
+	debug_show = _debug_show
 	debug_show_collision_polygone = false
 	if not is_inside_tree():
 		return
-	if show_debug:
+	if debug_show:
 		line.z_index = LINE_Z_INDEX
 		polygon.z_index = POLYGON_Z_INDEX
 	else:
