@@ -1,3 +1,48 @@
-[gd_scene format=3 uid="uid://coi3we5iw6xws"]
+[gd_scene load_steps=9 format=3 uid="uid://coi3we5iw6xws"]
+
+[ext_resource type="Script" path="res://custom_polygon_tool/CustomCurve2D.gd" id="1_m2wd1"]
+[ext_resource type="Script" path="res://custom_polygon_tool/custom_polygon_tool.gd" id="2_7y6of"]
+[ext_resource type="Shader" path="res://custom_polygon_tool/cpt_inner.gdshader" id="3_v3tk8"]
+[ext_resource type="Texture2D" uid="uid://fskijh8nsb3a" path="res://custom_polygon_tool/cpt_inner_custom.bmp" id="4_1d62y"]
+[ext_resource type="Shader" path="res://custom_polygon_tool/cpt_line.gdshader" id="4_d1d3i"]
+
+[sub_resource type="Curve2D" id="Curve2D_e0kav"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 1.53076e-14, -250, 0, 0, 0, 0, 216.506, 125, 0, 0, 0, 0, -216.506, 125, 0, 0, 0, 0, -4.59227e-14, -250)
+}
+point_count = 4
+script = ExtResource("1_m2wd1")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ete0j"]
+shader = ExtResource("3_v3tk8")
+shader_parameter/p_c_d = 0.5
+shader_parameter/is_elements_from_backbuffer_setup = 1.0
+shader_parameter/use_sdf = 1.0
+shader_parameter/sdf_aim = 500.0
+shader_parameter/outer_line_color = null
+shader_parameter/p_tex_tiling = 1.0
+shader_parameter/p_tex_size = Vector2(128, 128)
+shader_parameter/c_tex_tiling = 1.0
+shader_parameter/c_tex_size = Vector2(1024, 1024)
+shader_parameter/c_main_splats_color = Color(0, 0, 0, 1)
+shader_parameter/c_main_sampler = ExtResource("4_1d62y")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dnlmu"]
+shader = ExtResource("4_d1d3i")
 
 [node name="TestCustomPolygonTool" type="Node2D"]
+
+[node name="CustomPolygonTool" type="Path2D" parent="."]
+curve = SubResource("Curve2D_e0kav")
+script = ExtResource("2_7y6of")
+inner_material = SubResource("ShaderMaterial_ete0j")
+draw_line_on_borders = true
+line_material = SubResource("ShaderMaterial_dnlmu")
+shape = 1
+poly_radius = 250.0
+poly_number_of_points = 3
+free_custom_bake_interval = 75.0
+free_angle_threshold = 0.05
+debug_show_collision_polygone = false
+debug_points_radius = 7.0
+debug_points_color = Array[Color]([Color(1, 0.388235, 0.278431, 1), Color(1, 0.647059, 0, 1)])

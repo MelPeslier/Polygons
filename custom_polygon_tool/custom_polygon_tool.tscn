@@ -1,37 +1,61 @@
-[gd_scene load_steps=8 format=3 uid="uid://cdr008kdmyjx2"]
+[gd_scene load_steps=10 format=3 uid="uid://cdr008kdmyjx2"]
 
 [ext_resource type="Script" path="res://custom_polygon_tool/custom_polygon_tool.gd" id="1_o4mai"]
-[ext_resource type="Shader" path="res://custom_polygon_tool/custom_polygon_tool.gdshader" id="2_18h3j"]
-[ext_resource type="Shader" path="res://custom_polygon_tool/cpt_inside.gdshader" id="4_ftvwt"]
+[ext_resource type="Shader" path="res://custom_polygon_tool/cpt_line.gdshader" id="4_0s6cn"]
+[ext_resource type="Shader" path="res://custom_polygon_tool/cpt_inner.gdshader" id="4_ftvwt"]
+[ext_resource type="Texture2D" uid="uid://fskijh8nsb3a" path="res://custom_polygon_tool/cpt_inner_custom.bmp" id="4_ha4q3"]
 [ext_resource type="Script" path="res://custom_polygon_tool/CustomCurve2D.gd" id="4_wltjh"]
+[ext_resource type="Texture2D" uid="uid://dp8u5jvjsmd8g" path="res://project_icon.png" id="6_w5tp7"]
 
 [sub_resource type="Curve2D" id="Curve2D_qygqi"]
 bake_interval = 92.0
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 2.41232e-14, -393.975, 0, 0, 0, 0, 212.999, -331.433, 0, 0, 0, 0, 358.372, -163.663, 0, 0, 0, 0, 389.965, 56.0685, 0, 0, 0, 0, 297.746, 257.999, 0, 0, 0, 0, 110.996, 378.016, 0, 0, 0, 0, -110.996, 378.016, 0, 0, 0, 0, -297.746, 257.999, 0, 0, 0, 0, -389.965, 56.0685, 0, 0, 0, 0, -358.372, -163.663, 0, 0, 0, 0, -212.999, -331.433, 0, 0, 0, 0, -4.2229e-13, -393.975)
+"points": PackedVector2Array(0, 0, 0, 0, 3.06152e-14, -500, 0, 0, 0, 0, 390.916, -311.745, 0, 0, 0, 0, 487.464, 111.26, 0, 0, 0, 0, 216.942, 450.484, 0, 0, 0, 0, -216.942, 450.484, 95.8917, 239.729, -95.8917, -239.729, -632, 242, 0, 0, 0, 0, -390.916, -311.745, 0, 0, 0, 0, -9.18455e-14, -500)
 }
-point_count = 12
+point_count = 8
 script = ExtResource("4_wltjh")
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_7ycuf"]
-shader = ExtResource("2_18h3j")
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_koiot"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sibrn"]
 shader = ExtResource("4_ftvwt")
+shader_parameter/p_c_d = 0.5
+shader_parameter/is_elements_from_backbuffer_setup = 0.0
+shader_parameter/use_sdf = 1.0
+shader_parameter/sdf_aim = 500.0
+shader_parameter/outer_line_color = null
+shader_parameter/p_tex_tiling = 1.0
+shader_parameter/p_tex_size = Vector2(128, 128)
+shader_parameter/c_tex_tiling = 1.0
+shader_parameter/c_tex_size = Vector2(1024, 1024)
+shader_parameter/c_main_splats_color = Color(0, 0, 0, 1)
+shader_parameter/c_main_sampler = ExtResource("4_ha4q3")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cnn1j"]
+shader = ExtResource("4_0s6cn")
 
 [node name="CustomPolygonTool" type="Path2D"]
 unique_name_in_owner = true
+position = Vector2(-34, 57)
+rotation = -0.000651149
 curve = SubResource("Curve2D_qygqi")
 script = ExtResource("1_o4mai")
-edge_material = SubResource("ShaderMaterial_7ycuf")
-inner_material = SubResource("ShaderMaterial_koiot")
-show_debug = true
-poly_radius = 393.975
-poly_number_of_points = 11
-free_custom_bake_interval = 92.0
-free_angle_threshold = 0.00872665
+inner_material = SubResource("ShaderMaterial_sibrn")
+line_material = SubResource("ShaderMaterial_cnn1j")
+poly_radius = 500.0
+poly_number_of_points = 7
+free_custom_bake_interval = 75.0
+free_angle_threshold = 0.05
 debug_show_collision_polygone = false
 debug_points_radius = 7.0
 debug_points_color = Array[Color]([Color(1, 0.388235, 0.278431, 1), Color(1, 0.647059, 0, 1)])
 metadata/_edit_group_ = true
 metadata/_edit_vertical_guides_ = [-305.0]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+z_index = -4
+position = Vector2(29.7037, -59.3104)
+scale = Vector2(13.8069, 10.2124)
+texture = ExtResource("6_w5tp7")
+
+[node name="CptInnerCustom" type="Sprite2D" parent="."]
+position = Vector2(793.046, -70.4836)
+texture = ExtResource("4_ha4q3")

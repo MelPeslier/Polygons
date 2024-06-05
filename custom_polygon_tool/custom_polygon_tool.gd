@@ -2,10 +2,12 @@
 class_name CustomPolygonTool
 extends Path2D
 
-const line_z_index : int = -1
-const polygon_z_index : int = -2
-const tex = preload("res://icon.svg")
-
+const LINE_Z_INDEX : int = -1
+const POLYGON_Z_INDEX : int = -2
+const INNER_BASE_MATERIAL = preload("res://custom_polygon_tool/cpt_inner.gdshader")
+const LINE_BASE_MATERIAL = preload("res://custom_polygon_tool/cpt_line.gdshader")
+const MATERIAL_BASE_TEXTURE = preload("res://custom_polygon_tool/cpt_inner_custom.bmp")
+# TODO Give a choice in the material, to make the uv local  or not and psecifie in inspector that you must configure the uv in the uv editor of pollygon :)
 # TODO : make it an addon
 # TODO : make it so we can undo and get out previous shape
 # It does not work when going from free to poly and hitting undo key
@@ -21,19 +23,10 @@ enum Type {
 	OPEN,
 }
 
+@export var inner_material : ShaderMaterial : set = _set_inner_material
 
-#@export var custom_curve_2d : CustomCurve2D : set = _set_custom_curve_2d
-#
-#func _set_custom_curve_2d(_new_curve : CustomCurve2D) -> void:
-	#custom_curve_2d = _new_curve
-	#EditorInterface.edit_resource(custom_curve_2d)
-
-
-@export var edge_material : ShaderMaterial
-@export var inner_material : ShaderMaterial
-var is_curve_connected := false : set = _set_is_curve_connected
-
-
+@export var draw_line_on_borders := false : set = _set_draw_line_on_borders # TODO : Make line material adaptative to this
+@export var line_material : ShaderMaterial : set = _set_line_material
 
 @export var shape := Shape.FREE : set = _set_shape
 #region FREE properties
@@ -57,11 +50,15 @@ var debug_points_color : Array[Color] = [Color.TOMATO, Color.ORANGE] : set = _se
 var debug_points_radius : float = 7.0 : set = _set_debug_points_radius
 #endregion
 
+var is_curve_connected := false : set = _set_is_curve_connected
+
+
 # Nodes
 var line: Line2D
 var static_body : StaticBody2D
 var polygon: Polygon2D
-var collision_polygon: CollisionPolygon2D
+var collision_polygon: CollisionPolygon2D #TODO make their collision layers and masks editable into the inspector 
+var light_occluder : LightOccluder2D #TODO make their collision layers and masks editable into the inspector 
 
 # TODO :remove the suffix of property groups !
 func _get_property_list() -> Array[Dictionary]:
@@ -186,9 +183,16 @@ func _ready() -> void:
 	collision_polygon = CollisionPolygon2D.new()
 	static_body.add_child(collision_polygon)
 
+	# TODO make it so that it just add it to the parent when the parent is a static body ( and move/remove it when cpt is moved )
+	# TODO For all objects so they all are editable by the user !
 	polygon = Polygon2D.new()
 	static_body.add_child(polygon)
 	_update_polygon()
+	
+	light_occluder = LightOccluder2D.new()
+	add_child(light_occluder)
+	light_occluder.occluder = OccluderPolygon2D.new()
+	_update_occluder()
 
 	# Update exported variables
 	show_debug = show_debug
@@ -209,9 +213,6 @@ func _refresh_curve() -> void:
 			#we do free
 		Shape.POLY:
 			shape = Shape.FREE
-			print("want to edit this shape freely ?")
-		# TODO : Bring a pop-up that will tell that the current curve will be erased, are you sure to proceed ?
-		# Juste le faire et affficher un bouton undo / que l'on peut faire ctrl + z
 	var _custom_curve : CustomCurve2D = curve as CustomCurve2D
 
 	var _points := _custom_curve.get_baked_points()
@@ -255,6 +256,8 @@ func _refresh_curve() -> void:
 		collision_polygon.polygon = points
 	if polygon:
 		polygon.polygon = points
+	if light_occluder:
+		light_occluder.occluder.polygon = points
 
 	queue_redraw()
 
@@ -281,20 +284,23 @@ func draw_circle_polygon(_radius: float, _nb_points: int) -> void:
 		collision_polygon.polygon = points
 	if polygon:
 		polygon.polygon = points
-
+	if light_occluder:
+		light_occluder.occluder.polygon = points
 
 
 func _update_line() -> void:
-	line.z_index = line_z_index
-	line.texture = tex
+	line.z_index = LINE_Z_INDEX
 	line.texture_mode = Line2D.LINE_TEXTURE_TILE
-	line.material = edge_material
+	line_material = line_material
+	draw_line_on_borders = draw_line_on_borders
 
 func _update_polygon() -> void:
-	polygon.z_index = polygon_z_index
-	polygon.texture = tex
+	polygon.z_index = POLYGON_Z_INDEX
 	polygon.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
-	polygon.material = inner_material
+	inner_material = inner_material
+
+func _update_occluder() -> void:
+	light_occluder.visibility_layer = 0
 #endregion
 
 
@@ -305,6 +311,14 @@ func init_default_shape() -> void:
 		curve = CustomCurve2D.new()
 	if curve.point_count < 2:
 		shape = Shape.POLY
+
+func _set_draw_line_on_borders(_draw_line_on_borders) -> void:
+	draw_line_on_borders = _draw_line_on_borders
+	if not is_inside_tree():
+		return
+	if line:
+		line.visible = draw_line_on_borders
+	
 
 
 func _set_is_curve_connected(_is : bool) -> void:
@@ -331,7 +345,6 @@ func _set_shape(_shape: Shape) -> void:
 
 	print("set_shape ", _shape)
 	# Only if new shape
-	# TODO : Bring a pop-up that will tell that the current curve will be erased, are you sure to proceed ?
 	_set_is_curve_connected(true)
 	match shape:
 		Shape.POLY:
@@ -349,11 +362,11 @@ func _set_show_debug(_show_debug: bool) -> void:
 	if not is_inside_tree():
 		return
 	if show_debug:
-		line.z_index = line_z_index
-		polygon.z_index = polygon_z_index
+		line.z_index = LINE_Z_INDEX
+		polygon.z_index = POLYGON_Z_INDEX
 	else:
-		line.z_index = -polygon_z_index
-		polygon.z_index = -line_z_index
+		line.z_index = -POLYGON_Z_INDEX
+		polygon.z_index = -LINE_Z_INDEX
 	notify_property_list_changed()
 	queue_redraw()
 
@@ -395,15 +408,39 @@ func _set_free_angle_threshold(_free_angle_threshold : float) -> void:
 #endregion
 
 #region POLY
-func _set_poly_radius(_poly_radius) -> void:
+func _set_poly_radius(_poly_radius: float) -> void:
 	poly_radius = _poly_radius
 	if not is_inside_tree():
 		return
 	_update_circle_polygon()
 
-func _set_poly_number_of_points(_poly_number_of_points) -> void:
+func _set_poly_number_of_points(_poly_number_of_points: int) -> void:
 	poly_number_of_points = _poly_number_of_points
 	if not is_inside_tree():
 		return
 	_update_circle_polygon()
+#endregion
+
+#region MAERIALS
+func _set_inner_material(_inner_material: ShaderMaterial) -> void:
+	inner_material = _inner_material
+	if not inner_material:
+		inner_material = ShaderMaterial.new()
+		inner_material.shader = INNER_BASE_MATERIAL
+		inner_material.set_shader_parameter("c_main_sampler", MATERIAL_BASE_TEXTURE)
+		inner_material.set_shader_parameter("c_tex_size", MATERIAL_BASE_TEXTURE.get_size())
+	if not is_inside_tree():
+		return
+	if polygon:
+		polygon.material = inner_material
+
+func _set_line_material(_line_material: ShaderMaterial) -> void:
+	line_material = _line_material
+	if not line_material:
+		line_material = ShaderMaterial.new()
+		line_material.shader = LINE_BASE_MATERIAL
+	if not is_inside_tree():
+		return
+	if line:
+		line.material = line_material
 #endregion
