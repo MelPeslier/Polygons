@@ -47,6 +47,12 @@ func load_or_create_polygon():
 		get_parent().add_child.call_deferred(polygon)
 		set_custom_owner.call_deferred(polygon)
 		_update_polygon()
+		EditorInterface.get_selection().clear()
+		EditorInterface.get_selection().add_node(polygon)
+		print(polygon.get_meta_list())
+		polygon.set_meta("_edit_lock_", true)
+		print(polygon.get_meta_list())
+
 
 func load_or_create_line():
 	line = get_parent().get_node_or_null(LINE_NAME)
@@ -56,6 +62,7 @@ func load_or_create_line():
 		get_parent().add_child.call_deferred(line)
 		set_custom_owner.call_deferred(line)
 		_update_line()
+		line.set_meta("_edit_lock_", true)
 
 func load_or_create_occluder():
 	light_occluder = get_parent().get_node_or_null(LIGHT_OCCLUDER_NAME)
@@ -66,6 +73,7 @@ func load_or_create_occluder():
 		get_parent().add_child.call_deferred(light_occluder)
 		set_custom_owner.call_deferred(light_occluder)
 		_update_occluder()
+		light_occluder.set_meta("_edit_lock_", true)
 
 func load_or_create_collision():
 	collision_polygon = get_parent().get_node_or_null(COLLISION_NAME)
@@ -74,7 +82,7 @@ func load_or_create_collision():
 		collision_polygon.name = COLLISION_NAME
 		get_parent().add_child.call_deferred(collision_polygon)
 		set_custom_owner.call_deferred(collision_polygon)
-		collision_polygon.set_meta("locked", true)
+		collision_polygon.set_meta("_edit_lock_", true)
 		
 
 func set_custom_owner(_node : Variant) -> void:

@@ -17,22 +17,9 @@ const MATERIAL_PROTOTYPE_TEXTURE = preload("res://addons/custom_polygon_tool/sam
 const GRADIENT_FRACTAL = preload("res://addons/custom_polygon_tool/samplers/fractal_gradient_2d.tres")
 
 
-#TODO make it so we can either have this one wich is used into a custom character body 
-#to give control over it or a generic one that serve as a level builder and will just 
-#create a static body on it's own and we will choose the collisions inside it
-
-#  TODO : material : Use #if to reduce performance costs and not calculating other parts than the actual one ?
-# TODO automatically bake a UV centered with edges on edges (maximise size) for polygon
-
 enum Shape {## Edit modes
 	FREE,## Edit the shape freely
 	POLY,## Create polygons based on radius and a number of points[br](They will be added at regular angles)
-}
-
-#TODO make a variable to make the the polygon follow like the line, and is empty
-enum Type {
-	CLOSED, ## Closed shape
-	OPEN, ## Open shape
 }
 
 ## Material for the inner polygon
