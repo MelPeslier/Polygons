@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://bxqwbtbr8tp50"]
+[gd_scene load_steps=18 format=3 uid="uid://bxqwbtbr8tp50"]
 
 [ext_resource type="PackedScene" uid="uid://dpa7i0bdffddr" path="res://addons/custom_polygon_tool/examples/animatable_body_2d_demo.tscn" id="1_ueyam"]
 [ext_resource type="Script" path="res://addons/custom_polygon_tool/scripts/cpt_curve2d.gd" id="1_wubxh"]
@@ -73,6 +73,33 @@ shader = ExtResource("6_3uv7n")
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vlb2k"]
 shader = ExtResource("6_3uv7n")
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_3vb18"]
+shader = ExtResource("3_tgooy")
+shader_parameter/p_c_f_d = 0.5
+shader_parameter/uv_local_global = 1.0
+shader_parameter/p_use_sdf = 1.0
+shader_parameter/p_sdf_aim = 500.0
+shader_parameter/p_tex_tiling = 1.0
+shader_parameter/p_tex_size = Vector2(1024, 1024)
+shader_parameter/p_sdf_color = null
+shader_parameter/p_main_sampler = ExtResource("4_ibng2")
+shader_parameter/c_use_back_buffer = 1.0
+shader_parameter/c_use_sdf = 1.0
+shader_parameter/c_sdf_aim = 500.0
+shader_parameter/c_sdf_color = null
+shader_parameter/c_tex_tiling = 1.0
+shader_parameter/c_tex_size = Vector2(1024, 1024)
+shader_parameter/c_main_splats_color = Color(0, 0, 0, 1)
+shader_parameter/c_main_sampler = ExtResource("4_ibng2")
+shader_parameter/f_sdf_aim = 150.0
+shader_parameter/f_color_sampler = ExtResource("5_pme6i")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_rkgv1"]
+shader = ExtResource("6_3uv7n")
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_eq8my"]
+polygon = PackedVector2Array(1.53076e-14, -250, 216.506, 125, -216.506, 125, -4.59227e-14, -250)
+
 [node name="Node2D" type="Node2D"]
 
 [node name="AnimatableBody2DDemo" parent="." instance=ExtResource("1_ueyam")]
@@ -138,3 +165,28 @@ line_material = SubResource("ShaderMaterial_vlb2k")
 [node name="Create a new one instead" type="Node" parent="."]
 
 [node name="This is to avoid issues with shared data" type="Node" parent="."]
+
+[node name="CPT_Polygon" type="Polygon2D" parent="."]
+z_index = 1
+texture_repeat = 2
+material = SubResource("ShaderMaterial_3vb18")
+polygon = PackedVector2Array(1.53076e-14, -250, 216.506, 125, -216.506, 125, -4.59227e-14, -250)
+metadata/_edit_lock_ = true
+
+[node name="CPT_Line" type="Line2D" parent="."]
+visible = false
+z_index = 2
+material = SubResource("ShaderMaterial_rkgv1")
+points = PackedVector2Array(1.53076e-14, -250, 216.506, 125, -216.506, 125, -4.59227e-14, -250)
+texture_mode = 1
+metadata/_edit_lock_ = true
+
+[node name="CPT_Light_Occluder" type="LightOccluder2D" parent="."]
+visibility_layer = 0
+occluder = SubResource("OccluderPolygon2D_eq8my")
+metadata/_edit_lock_ = true
+
+[node name="CPT_Collision_Polygon" type="CollisionPolygon2D" parent="."]
+visible = false
+polygon = PackedVector2Array(1.53076e-14, -250, 216.506, 125, -216.506, 125, -4.59227e-14, -250)
+metadata/_edit_lock_ = true

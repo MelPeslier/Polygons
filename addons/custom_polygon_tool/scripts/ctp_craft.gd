@@ -1,4 +1,5 @@
 @tool
+@icon("res://addons/custom_polygon_tool/icons/cpt_craft_icon.png")
 ## Use it as the [b]only[/b] CPT_Craft child of a body CollisionObject2D derived node
 ##[br]Only use 1 per scene
 class_name CPT_Craft

@@ -1,4 +1,5 @@
 @tool
+@icon("res://addons/custom_polygon_tool/icons/cpt_terrain_icon.png")
 ##Use it to create as many static terrains as you want
 ##[br] No limitations here
 class_name CPT_Terrain

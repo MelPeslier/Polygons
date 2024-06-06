@@ -1,4 +1,5 @@
 @tool
+@icon("res://addons/custom_polygon_tool/icons/cpt_icon.png")
 ## This class is not meant to be instantiated
 class_name CPT
 extends Path2D
