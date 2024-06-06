@@ -77,19 +77,19 @@ shader = ExtResource("6_3uv7n")
 
 [node name="AnimatableBody2DDemo" parent="." instance=ExtResource("1_ueyam")]
 z_index = -2
-position = Vector2(341, -86)
+position = Vector2(267, 74)
 
 [node name="AnimatableBody2DDemo2" parent="." instance=ExtResource("1_ueyam")]
 z_index = -2
-position = Vector2(-649, -88)
+position = Vector2(-495, 52)
 
 [node name="AnimatableBody2DDemo3" parent="." instance=ExtResource("1_ueyam")]
 z_index = -2
-position = Vector2(-203, -352)
+position = Vector2(27, -108)
 
 [node name="CPT_Terrain_new_one_not_shared" type="Path2D" parent="."]
 z_index = 7
-position = Vector2(-110, 413)
+position = Vector2(1623, 244)
 curve = SubResource("Curve2D_gf8h6")
 script = ExtResource("2_k1nir")
 inner_material = SubResource("ShaderMaterial_55dld")
