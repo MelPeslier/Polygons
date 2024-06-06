@@ -436,7 +436,7 @@ func _set_inner_material(_inner_material: ShaderMaterial) -> void:
 		inner_material.set_shader_parameter("p_main_sampler", MATERIAL_PROTOTYPE_TEXTURE)
 		inner_material.set_shader_parameter("p_tex_size", MATERIAL_PROTOTYPE_TEXTURE.get_size())
 		
-		inner_material.set_shader_parameter("f_color_sampler", GRADIENT_FRACTAL)
+		inner_material.set_shader_parameter("f_color_sampler", GRADIENT_FRACTAL.duplicate(true))
 	if not is_inside_tree():
 		return
 	if polygon:

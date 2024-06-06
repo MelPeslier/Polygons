@@ -1,6 +1,6 @@
 [gd_scene load_steps=18 format=3 uid="uid://bxqwbtbr8tp50"]
 
-[ext_resource type="PackedScene" uid="uid://dpa7i0bdffddr" path="res://addons/custom_polygon_tool/examples/animatable_body_2d_demo.tscn" id="1_ueyam"]
+[ext_resource type="PackedScene" uid="uid://dpa7i0bdffddr" path="res://addons/custom_polygon_tool/examples/CreateYourOwnBodyWithCPT_Craft.tscn" id="1_ueyam"]
 [ext_resource type="Script" path="res://addons/custom_polygon_tool/scripts/cpt_curve2d.gd" id="1_wubxh"]
 [ext_resource type="Script" path="res://addons/custom_polygon_tool/scripts/cpt_terrain.gd" id="2_k1nir"]
 [ext_resource type="Shader" path="res://addons/custom_polygon_tool/materials/cpt_inner.gdshader" id="3_tgooy"]
