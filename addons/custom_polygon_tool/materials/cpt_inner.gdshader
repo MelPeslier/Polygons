@@ -9,7 +9,7 @@ uniform float p_sdf_aim : hint_range(0.0, 1000.0, 0.1) = 500.0;
 uniform float p_tex_tiling = 1.0;
 uniform vec2 p_tex_size = vec2(128.0);
 uniform vec3 p_sdf_color : source_color;
-uniform sampler2D p_main_sample : hint_default_black, repeat_enable;
+uniform sampler2D p_main_sampler : hint_default_black, repeat_enable;
 
 
 
@@ -29,8 +29,8 @@ uniform sampler2D c_mix_main_splats_sampler : hint_default_black, repeat_enable;
 
 
 group_uniforms fractal;
-uniform float f_sdf_aim : hint_range(0.0, 1000.0, 0.1) = 300.0;
-uniform sampler2D f_color_sample : hint_default_black;
+uniform float f_sdf_aim : hint_range(0.0, 1000.0, 0.1) = 150.0;
+uniform sampler2D f_color_sampler : hint_default_black;
 
 
 group_uniforms debug;
@@ -62,7 +62,7 @@ void fragment() {
 	vec2 p_world_uv = p_tex_uv * world_pos;
 	vec2 p_uv = mix(UV, p_world_uv, uv_local_global);
 	
-	vec4 p_main_tex = texture(p_main_sample, p_uv);
+	vec4 p_main_tex = texture(p_main_sampler, p_uv);
 	
 	vec4 p_final_tex = vec4( vec3(0.0), original_tex.a) ;
 	
@@ -85,12 +85,12 @@ void fragment() {
 
 	// _____ TODO _____ make the uv  being different , no same shit texture  all the time, ad variations, in intensity and  positionning
 	// _ Then add secondary texture
-	vec4 c_secondary_tex = texture(c_secondary_sampler, c_world_uv);
-	float c_mix_tex_coef = texture(c_mix_main_secondary_sampler, c_world_uv).r;
+	vec4 c_secondary_tex = texture(c_secondary_sampler, c_uv);
+	float c_mix_tex_coef = texture(c_mix_main_secondary_sampler, c_uv).r;
 	c_main_tex = mix(c_main_tex, c_secondary_tex, c_mix_tex_coef);
 
 	// _ Then add color splats
-	float c_mix_main_color_splats = texture(c_mix_main_splats_sampler, c_world_uv).r;
+	float c_mix_main_color_splats = texture(c_mix_main_splats_sampler, c_uv).r;
 	c_main_tex.rgb = mix(c_main_tex.rgb, c_main_splats_color.rgb, c_mix_main_color_splats);
 
 	// * Mix outer elements from back buffer *
@@ -109,7 +109,7 @@ void fragment() {
 // *** FRACTAL ***
 	float f_inner_sdf = -sdf_value * f_sdf_aim / 10000.0 ;
 	float f_fract = fract( f_inner_sdf );
-	vec4 f_final_tex = texture(f_color_sample, vec2(f_fract, 0.0) ) ;
+	vec4 f_final_tex = texture(f_color_sampler, vec2(f_fract, 0.0) ) ;
 // *** _____ ***
 
 

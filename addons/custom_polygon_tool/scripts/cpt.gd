@@ -1,36 +1,51 @@
 @tool
-class_name CustomPolygonTool
+## This class is not meant to be instantiated
+class_name CPT
 extends Path2D
-
 const LINE_Z_INDEX : int = -1
 const POLYGON_Z_INDEX : int = -2
-const INNER_BASE_MATERIAL = preload("res://custom_polygon_tool/cpt_inner.gdshader")
-const LINE_BASE_MATERIAL = preload("res://custom_polygon_tool/cpt_line.gdshader")
-const MATERIAL_BASE_TEXTURE = preload("res://custom_polygon_tool/cpt_inner_custom.bmp")
 
-# TODO : make it an addon
-# TODO : make it so we can undo and get out previous shape
-# It does not work when going from free to poly and hitting undo key
+## Base material for the inner polygon[br]
+const INNER_BASE_MATERIAL = preload("res://addons/custom_polygon_tool/materials/cpt_inner.gdshader")
+## Base material for the line2D[br]
+const LINE_BASE_MATERIAL = preload("res://addons/custom_polygon_tool/materials/cpt_line.gdshader")
+##Base texture for the 'custom' mode of the cpt_inner.gd[br]
+const MATERIAL_BASE_TEXTURE = preload("res://addons/custom_polygon_tool/samplers/cpt_inner_custom.bmp")
+##Base texture for the 'prototype' mode of the cpt_inner.gd[br]
+const MATERIAL_PROTOTYPE_TEXTURE = preload("res://addons/custom_polygon_tool/samplers/cpt_inner_custom.bmp")
+##Base gradient for the 'fractal' mode of the cpt_inner.gd[br]
+const GRADIENT_FRACTAL = preload("res://addons/custom_polygon_tool/samplers/fractal_gradient_2d.tres")
+
+
+#TODO make it so we can either have this one wich is used into a custom character body 
+#to give control over it or a generic one that serve as a level builder and will just 
+#create a static body on it's own and we will choose the collisions inside it
+
 #  TODO : material : Use #if to reduce performance costs and not calculating other parts than the actual one ?
 # TODO automatically bake a UV centered with edges on edges (maximise size) for polygon
-enum Shape {
-	FREE,
-	POLY,
+
+enum Shape {## Edit modes
+	FREE,## Edit the shape freely
+	POLY,## Create polygons based on radius and a number of points[br](They will be added at regular angles)
 }
 
+#TODO make a variable to make the the polygon follow like the line, and is empty
 enum Type {
-	CLOSED,
-	OPEN,
+	CLOSED, ## Closed shape
+	OPEN, ## Open shape
 }
 
+## Material for the inner polygon
 @export var inner_material : ShaderMaterial : set = _set_inner_material
 
 @export_group("Shape")
+## Choose between edit modes
 @export var shape := Shape.FREE : set = _set_shape
 #region FREE properties
 #@export_subgroup("FREE", "free_")
-var free_custom_bake_interval: float = 75 : set = _set_free_custom_bake_interval
-var free_angle_threshold : float = 0.05 : set = _set_free_angle_threshold
+
+var free_custom_bake_interval: float = 75 : set = _set_free_custom_bake_interval ## Custom bake interval to reduce amount of points
+var free_angle_threshold : float = 0.05 : set = _set_free_angle_threshold ## Angle threshold to reduce amount of points
 #endregion
 
 
@@ -61,10 +76,9 @@ var is_curve_connected := false : set = _set_is_curve_connected
 
 # Nodes
 var line: Line2D
-var static_body : StaticBody2D
 var polygon: Polygon2D
-var collision_polygon: CollisionPolygon2D #TODO make their collision layers and masks editable into the inspector 
-var light_occluder : LightOccluder2D #TODO make their collision layers and masks editable into the inspector 
+var collision_polygon: CollisionPolygon2D 
+var light_occluder : LightOccluder2D
 
 
 func _get_property_list() -> Array[Dictionary]:
@@ -100,7 +114,7 @@ func _get_property_list() -> Array[Dictionary]:
 			"class_name" : "",
 			"type" : TYPE_FLOAT,
 			"hint" : PROPERTY_HINT_RANGE,
-			"hint_string" : "",
+			"hint_string" : "15.0, 5000.0, 0.5, suffix:px",
 			"usage" : poly_property_usage,
 		},
 		{
@@ -201,50 +215,49 @@ func _draw() -> void:
 
 
 func _ready() -> void:
-	# Update curve
-	if not (curve and curve is CustomCurve2D):
-		curve = CustomCurve2D.new()
-		var _custom_curve : CustomCurve2D = curve as CustomCurve2D
-
-	# Add child nodes
-	line = Line2D.new()
-	add_child(line)
-	_update_line()
-
-	static_body = StaticBody2D.new()
-	add_child(static_body)
-
-	collision_polygon = CollisionPolygon2D.new()
-	static_body.add_child(collision_polygon)
-
-	# TODO make it so that it just add it to the parent when the parent is a static body ( and move/remove it when cpt is moved )
-	# TODO For all objects so they all are editable by the user !
-	polygon = Polygon2D.new()
-	static_body.add_child(polygon)
-	_update_polygon()
-	
-	light_occluder = LightOccluder2D.new()
-	add_child(light_occluder)
-	light_occluder.occluder = OccluderPolygon2D.new()
-	_update_occluder()
-
+	create_polygons()
+		
 	# Update exported variables
 	debug_show = debug_show
 	debug_show_collision_polygone = debug_show_collision_polygone
-	init_default_shape()
+	_init_default_shape()
 	shape = shape
 
+## Base function for inherited classes to customise them
+func create_polygons() -> void:
+	pass
+
+#region Functions
+func _update_circle_polygon() -> void:
+	draw_circle_polygon(poly_radius, poly_number_of_points)
+
+## Create circle polygons
+func draw_circle_polygon(_radius: float, _nb_points: int) -> void:
+	curve.clear_points()
+	var points := PackedVector2Array()
+	for i : int in range(_nb_points + 1):
+		var point : float =  i * TAU / _nb_points - PI/2.0
+		var point_in_space : Vector2 = Vector2( cos(point), sin(point) ) * _radius
+		points.push_back(point_in_space)
+		curve.add_point( point_in_space )
+
+	if line:
+		line.points = points
+	if collision_polygon:
+		collision_polygon.polygon = points
+	if polygon:
+		polygon.polygon = points
+	if light_occluder:
+		light_occluder.occluder.polygon = points
 
 
-
-# CustomCurve2D is now connected to the function
 func _refresh_curve() -> void:
 	match shape:
 		#Shape.FREE:
 			#we do free
 		Shape.POLY:
 			shape = Shape.FREE
-	var _custom_curve : CustomCurve2D = curve as CustomCurve2D
+	var _custom_curve : CPT_Curve2D = curve as CPT_Curve2D
 
 	var _points := _custom_curve.get_baked_points()
 	if not _points: return
@@ -281,8 +294,6 @@ func _refresh_curve() -> void:
 
 	if line:
 		line.points = points
-		# TODO : faire une petit fenetre pop qui indique le nombre de points enlevés !
-		print("after refresh actual points : ", line.points.size(), "   removed : ", _points.size() - points.size())
 	if collision_polygon:
 		collision_polygon.polygon = points
 	if polygon:
@@ -292,52 +303,30 @@ func _refresh_curve() -> void:
 
 	queue_redraw()
 
-
-
-#region Functions
-func _update_circle_polygon() -> void:
-	draw_circle_polygon(poly_radius, poly_number_of_points)
-
-func draw_circle_polygon(_radius: float, _nb_points: int) -> void:
-	curve.clear_points()
-	var points := PackedVector2Array()
-	for i : int in range(_nb_points + 1):
-		var point : float =  i * TAU / _nb_points - PI/2.0
-		var point_in_space : Vector2 = Vector2( cos(point), sin(point) ) * _radius
-		points.push_back(point_in_space)
-		curve.add_point( point_in_space )
-
-	if line:
-		line.points = points
-	if collision_polygon:
-		collision_polygon.polygon = points
-	if polygon:
-		polygon.polygon = points
-	if light_occluder:
-		light_occluder.occluder.polygon = points
-
-
+## Once a line is created, it will be called to update related properties
 func _update_line() -> void:
 	line.z_index = LINE_Z_INDEX
 	line.texture_mode = Line2D.LINE_TEXTURE_TILE
 	line_material = line_material
 	line_draw_on_borders = line_draw_on_borders
 
+## Once a polygon is created, it will be called to update related properties
 func _update_polygon() -> void:
 	polygon.z_index = POLYGON_Z_INDEX
 	polygon.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	inner_material = inner_material
 
+## Once a polygon is created, it will be called to update related properties
 func _update_occluder() -> void:
 	light_occluder.visibility_layer = 0
 #endregion
 
 
-# Setters - Getters
-# Main
-func init_default_shape() -> void:
-	if not (curve and curve is CustomCurve2D):
-		curve = CustomCurve2D.new()
+#region Setters - Getters
+## Initialise a new CPT_Curve2D, and set shape on Shape.POLY 
+func _init_default_shape() -> void:
+	if not (curve and curve is CPT_Curve2D):
+		curve = CPT_Curve2D.new()
 	if curve.point_count < 2:
 		shape = Shape.POLY
 
@@ -353,7 +342,7 @@ func _set_line_draw_on_borders(_line_draw_on_borders) -> void:
 
 func _set_is_curve_connected(_is : bool) -> void:
 	is_curve_connected = _is
-	var _custom_curve : CustomCurve2D = curve as CustomCurve2D
+	var _custom_curve : CPT_Curve2D = curve as CPT_Curve2D
 	# Disconnect curve
 	if not is_curve_connected:
 		if _custom_curve.points_changed.is_connected(_refresh_curve):
@@ -447,6 +436,7 @@ func _set_poly_number_of_points(_poly_number_of_points: int) -> void:
 #endregion
 
 #region MAERIALS
+##Showme
 func _set_inner_material(_inner_material: ShaderMaterial) -> void:
 	inner_material = _inner_material
 	if not inner_material:
@@ -454,10 +444,16 @@ func _set_inner_material(_inner_material: ShaderMaterial) -> void:
 		inner_material.shader = INNER_BASE_MATERIAL
 		inner_material.set_shader_parameter("c_main_sampler", MATERIAL_BASE_TEXTURE)
 		inner_material.set_shader_parameter("c_tex_size", MATERIAL_BASE_TEXTURE.get_size())
+		
+		inner_material.set_shader_parameter("p_main_sampler", MATERIAL_PROTOTYPE_TEXTURE)
+		inner_material.set_shader_parameter("p_tex_size", MATERIAL_PROTOTYPE_TEXTURE.get_size())
+		
+		inner_material.set_shader_parameter("f_color_sampler", GRADIENT_FRACTAL)
 	if not is_inside_tree():
 		return
 	if polygon:
 		polygon.material = inner_material
+
 
 func _set_line_material(_line_material: ShaderMaterial) -> void:
 	line_material = _line_material
@@ -468,4 +464,6 @@ func _set_line_material(_line_material: ShaderMaterial) -> void:
 		return
 	if line:
 		line.material = line_material
+#endregion
+
 #endregion

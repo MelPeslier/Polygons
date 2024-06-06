@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://fskijh8nsb3a"
-path="res://.godot/imported/cpt_inner_custom.bmp-897b610fca714a87a0e4e35604f56460.ctex"
+path="res://.godot/imported/cpt_inner_custom.bmp-92bc1eb61e6af16b9374f0ec732b01a3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://custom_polygon_tool/cpt_inner_custom.bmp"
-dest_files=["res://.godot/imported/cpt_inner_custom.bmp-897b610fca714a87a0e4e35604f56460.ctex"]
+source_file="res://addons/custom_polygon_tool/samplers/cpt_inner_custom.bmp"
+dest_files=["res://.godot/imported/cpt_inner_custom.bmp-92bc1eb61e6af16b9374f0ec732b01a3.ctex"]
 
 [params]
 

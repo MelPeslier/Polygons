@@ -1,5 +1,5 @@
 @tool
-class_name CustomCurve2D
+class_name CPT_Curve2D
 extends Curve2D
 signal points_changed
 
